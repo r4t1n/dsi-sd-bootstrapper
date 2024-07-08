@@ -13,39 +13,32 @@ def get_script_directory():
 def get_config():
     config_filepath = join_path(get_script_directory(), "config.ini")
 
-    if not path_exists("config.ini"):
-        print(f"Error: config file {config_filepath} does not exist")
-        exit(1)
+    if not path_exists(config_filepath):
+        raise Exception(f"Error reading config file: {config_filepath} does not exist")
 
     config = configparser.ConfigParser()
 
     try:
         config.read(config_filepath)
-    except configparser.Error as error:
-        print(f"Error reading config file: {error}")
+    except configparser.Error as e:
+        raise Exception(f"Error reading config file: {e}")
 
     return config
+
 
 def get_sd_root(config):
     sd_root = config["Settings"]["sd_root"]
 
     if sd_root == "":
-        print(":: SD root path from config file is empty, please edit config.ini")
-        exit(1)
-    elif check_valid_path(sd_root):
-        print(f":: Using following SD root path from config file: {sd_root}")
-        sd_root_choice = get_yes_no_input(
-            ">> Is the following SD root path correct (Y/n): "
+        raise Exception(
+            "Error: SD root path from config file is empty, please edit config.ini"
+        )
+    elif not check_valid_path(sd_root):
+        raise Exception(
+            "Error: Invalid SD root path in config file, please edit config.ini"
         )
 
-        if not sd_root_choice:
-            print(":: Exiting...")
-            exit(0)
-
-        return sd_root
-    else:
-        print(":: Invalid SD root path in config file, please edit config.ini")
-        exit(1)
+    return sd_root
 
 
 def get_flipnote_lenny_region(config):
@@ -53,15 +46,13 @@ def get_flipnote_lenny_region(config):
     regions = {"Japan": 1, "USA": 2, "Europe/Australia": 3}
 
     if region == "":
-        print(
-            ":: Flipnote Lenny region from config file is empty, please edit config.ini"
+        raise Exception(
+            "Error: Flipnote Lenny region from config file is empty, please edit config.ini"
         )
-        exit(1)
-    elif region in regions:
-        print(f":: Using the following region: {region}")
-        return regions[region]
-    else:
-        print(":: Invalid region in config file, please edit config.ini")
+    elif region not in regions:
+        raise Exception("Error: Invalid region in config file, please edit config.ini")
+
+    return regions[region]
 
 
 def get_yes_no_input(prompt, default=True):
@@ -75,7 +66,7 @@ def get_yes_no_input(prompt, default=True):
         elif choice == "n":
             return False
         else:
-            print("Invalid choice, enter y or n")
+            print("Invalid choice: enter y or n")
 
 
 def join_path(path, *paths):
@@ -90,7 +81,6 @@ def check_valid_path(path):
     if os.path.exists(path):
         return True
     else:
-        print(f"Error: {path} does not exist")
         return False
 
 
@@ -98,8 +88,8 @@ def make_directory(path):
     try:
         os.makedirs(path, exist_ok=True)
         print(f" made directory: {path}")
-    except OSError as error:
-        print(f"Error creating directory {path}: {error}")
+    except OSError as e:
+        raise Exception(f"Error creating directory {path}: {e}")
 
 
 def remove_directory(path):
@@ -107,11 +97,11 @@ def remove_directory(path):
         shutil.rmtree(path)
         print(f" removed directory: {path}")
     except FileNotFoundError:
-        print(f"Error: {path} not found")
+        raise Exception(f"Error: {path} not found")
     except PermissionError:
-        print(f"Error: Permission denied for {path}")
-    except Exception as error:
-        print(f"Error: {error}")
+        raise Exception(f"Error: Permission denied for {path}")
+    except Exception as e:
+        raise Exception(f"Error: {e}")
 
 
 def remove_file(path):
@@ -119,11 +109,11 @@ def remove_file(path):
         os.remove(path)
         print(f" removed file: {path}")
     except FileNotFoundError:
-        print(f"Error: {path} not found")
+        raise Exception(f"Error: {path} not found")
     except PermissionError:
-        print(f"Error: Permission denied for {path}")
-    except Exception as error:
-        print(f"Error: {error}")
+        raise Exception(f"Error: Permission denied for {path}")
+    except Exception as e:
+        raise Exception(f"Error: {e}")
 
 
 def download_url(url, filepath):
@@ -137,12 +127,12 @@ def download_url(url, filepath):
             data = response.read()
             output.write(data)
         print(f" downloaded file: {filepath}")
-    except urllib.error.HTTPError as http_error:
-        print(f"HTTP error occurred: {http_error}")
-    except urllib.error.URLError as url_error:
-        print(f"URL error occurred: {url_error}")
-    except Exception as error:
-        print(f"An error occurred: {error}")
+    except urllib.error.HTTPError as e:
+        raise Exception(f"HTTP error: {e}")
+    except urllib.error.URLError as e:
+        raise Exception(f"URL error: {e}")
+    except Exception as e:
+        raise Exception(f"Error: {e}")
 
 
 def extract_7z(filepath, output_path):
@@ -154,8 +144,8 @@ def extract_7z(filepath, output_path):
             check=True,
         )
         print(f" extracted 7-Zip archive: {filepath}")
-    except subprocess.CalledProcessError as error:
-        print(f"Error extracting {filepath}: {error}")
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Error extracting {filepath}: {e}")
 
 
 def extract_zip(filepath, output_path):
@@ -167,8 +157,8 @@ def extract_zip(filepath, output_path):
             check=True,
         )
         print(f" extracted zip archive: {output_path}")
-    except subprocess.CalledProcessError as error:
-        print(f"Error extracting {filepath}: {error}")
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Error extracting {filepath}: {e}")
 
 
 def move_file(source, destination):
@@ -179,11 +169,11 @@ def move_file(source, destination):
         else:
             print(f"Error moving file: {source} is not a file")
     except FileNotFoundError:
-        print(f"Error moving file: {source} not found")
+        raise Exception(f"Error moving file: {source} not found")
     except PermissionError:
-        print(f"Error moving file: Permission denied for {destination}")
-    except Exception as error:
-        print(f"Error moving file: {error}")
+        raise Exception(f"Error moving file: Permission denied for {destination}")
+    except Exception as e:
+        raise Exception(f"Error moving file: {e}")
 
 
 def copy_directory(source, destination):
@@ -196,8 +186,8 @@ def copy_directory(source, destination):
         else:
             print(f"Error moving directory: {source} is not a directory")
     except FileNotFoundError:
-        print(f"Error: {source} not found")
+        raise Exception(f"Error: {source} not found")
     except PermissionError:
-        print(f"Error: Permission denied for {destination}")
-    except Exception as error:
-        print(f"Error: {error}")
+        raise Exception(f"Error: Permission denied for {destination}")
+    except Exception as e:
+        raise Exception(f"Error: {e}")
