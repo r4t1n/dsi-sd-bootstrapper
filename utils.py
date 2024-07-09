@@ -6,6 +6,10 @@ import urllib.error
 import urllib.request
 
 
+class ConfigError(Exception):
+    pass
+
+
 def get_script_directory():
     return os.path.dirname(os.path.realpath(__file__))
 
@@ -14,27 +18,27 @@ def get_config():
     config_filepath = join_path(get_script_directory(), "config.ini")
 
     if not path_exists(config_filepath):
-        raise Exception(f"Error reading config file: {config_filepath} does not exist")
+        raise ConfigError(f"Error reading config file: {config_filepath} does not exist")
 
     config = configparser.ConfigParser()
 
     try:
         config.read(config_filepath)
     except configparser.Error as e:
-        raise Exception(f"Error reading config file: {e}")
+        raise ConfigError(f"Error reading config file: {e}")
 
     return config
 
 
 def get_sd_root(config):
-    sd_root = config["Settings"]["sd_root"]
+    sd_root = config["Options"]["SdRoot"]
 
     if sd_root == "":
-        raise Exception(
+        raise ConfigError(
             "Error: SD root path from config file is empty, please edit config.ini"
         )
     elif not check_valid_path(sd_root):
-        raise Exception(
+        raise ConfigError(
             "Error: Invalid SD root path in config file, please edit config.ini"
         )
 
@@ -42,15 +46,15 @@ def get_sd_root(config):
 
 
 def get_flipnote_lenny_region(config):
-    region = config["Cleanup"]["flipnote_lenny_region"]
+    region = config["Cleanup"]["FlipnoteLennyRegion"]
     regions = {"Japan": 1, "USA": 2, "Europe/Australia": 3}
 
     if region == "":
-        raise Exception(
+        raise ConfigError(
             "Error: Flipnote Lenny region from config file is empty, please edit config.ini"
         )
     elif region not in regions:
-        raise Exception("Error: Invalid region in config file, please edit config.ini")
+        raise ConfigError("Error: Invalid region in config file, please edit config.ini")
 
     return regions[region]
 

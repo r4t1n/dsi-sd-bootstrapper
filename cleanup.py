@@ -5,10 +5,13 @@
 
 import utils
 
+class ConfigError(Exception):
+    pass
+
 config = ""
 try:
     config = utils.get_config()
-except Exception as e:
+except ConfigError as e:
     print(e)
     exit(1)
 
@@ -23,7 +26,7 @@ def main():
     sd_root = ""
     try:
         sd_root = utils.get_sd_root(config)
-    except Exception as e:
+    except ConfigError as e:
         print(e)
         exit(1)
 
@@ -40,11 +43,11 @@ def main():
 
 
 def cleanup(sd_root):
-    if config["Cleanup"]["memory_pit"] == "True":
+    if config["Cleanup"]["MemoryPit"] == "True":
         memory_pit(sd_root)
-    elif config["Cleanup"]["flipnote_lenny"] == "True":
+    elif config["Cleanup"]["FlipnoteLenny"] == "True":
         flipnote_lenny(sd_root)
-    if config["Cleanup"]["unlaunch"] == "True":
+    if config["Cleanup"]["Unlaunch"] == "True":
         unlaunch(sd_root)
 
 
@@ -55,13 +58,12 @@ def memory_pit(sd_root):
         utils.remove_file(pit_filepath)
     except Exception as e:
         print(e)
-        exit(1)
 
 def flipnote_lenny(sd_root):
     try:
         region = utils.get_flipnote_lenny_region(config)
         print(f":: Using the following region: {region}")
-    except Exception as e:
+    except ConfigError as e:
         print(e)
         exit(1)
 
@@ -83,7 +85,6 @@ def flipnote_lenny(sd_root):
                 utils.remove_directory(region_path)
             except Exception as e:
                 print(e)
-                exit(1)
 
     print(" removing Flipnote Lenny PPM files...")
     for file, path in files.items():
@@ -93,7 +94,6 @@ def flipnote_lenny(sd_root):
             utils.remove_file(filepath)
         except Exception as e:
             print(e)
-            exit(1)
 
 def unlaunch(sd_root):
     print(" removing Unlaunch files from SD card...")
@@ -102,7 +102,6 @@ def unlaunch(sd_root):
         utils.remove_file(unlaunch_path)
     except Exception as e:
         print(e)
-        exit(1)
 
 if __name__ == "__main__":
     try:
