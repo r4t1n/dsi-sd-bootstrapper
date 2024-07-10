@@ -7,27 +7,26 @@ These Python scrips will get your SD card bootstrapped for homebrewing your Nint
 Before running any scripts you should edit the `config.ini` file, most of the options are simple True and False options to bootstrap the chosen program. Here's an example:
 
 ```
-[Settings]
-sd_root = /mnt/sd_card
+[Options]
+sdRoot =
 
-[Bootstrap Stage I]
-twilight_menu = True
-dumptool = True
+; Refer to: https://dsi.cfw.guide/get-started.html#section-i-prep-work
+; Memory Pit Facebook Icon: https://dsi.cfw.guide/launching-the-exploit.html#section-i-checking-your-dsi-camera-version
+[Bootstrap]
+twilightMenu = true
+dumpTool = true
+memoryPit = true
+memoryPitFacebookIcon = true
+flipnoteLenny = false
+unlaunch = true
+godmode9i = false
 
-[Bootstrap Stage II]
-memory_pit = True
-memory_pit_facebook_icon = True
-flipnote_lenny = False
-
-[Bootstrap Stage III]
-unlaunch = True
-godmode9i = False
-
+; Refer to: https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card
 [Cleanup]
-memory_pit = True
-flipnote_lenny = False
-flipnote_lenny_region = Europe/Australia
-unlaunch = True
+memoryPit = true
+flipnoteLenny = false
+flipnoteLennyRegion =
+unlaunch = true
 ```
 
 ## bootstrap.py
