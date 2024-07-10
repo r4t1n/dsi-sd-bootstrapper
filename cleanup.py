@@ -5,68 +5,49 @@
 
 import utils
 
-class ConfigError(Exception):
-    pass
 
-config = ""
-try:
-    config = utils.get_config()
-except ConfigError as e:
-    print(e)
-    exit(1)
-
+config = utils.config.get_config()
 tmp_directory = "/tmp/dsi-bootstrap"
 
 
 def main():
     print(
-        ":: This script will perform an SD card cleanup: https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card"
+        f"{utils.Color.start} {utils.Color.make_bold("This script will perform an SD card cleanup")}: https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card"
     )
 
-    sd_root = ""
-    try:
-        sd_root = utils.get_sd_root(config)
-    except ConfigError as e:
-        print(e)
-        exit(1)
+    sd_root = utils.config.get_sd_root(config)
+    print(f"{utils.Color.start} {utils.Color.make_bold("SD root path")}: {sd_root}")
 
-    sd_root_choice = utils.get_yes_no_input(
-        f">> Is the following SD root path correct: {sd_root} (Y/n): "
+    sd_root_choice = get_yes_no_input(
+        f"{utils.Color.start} {utils.Color.make_bold("Is the SD root path correct? [Y/n]")} "
     )
 
     if not sd_root_choice:
-        print(":: Exiting...")
-        exit(0)
+        exit()
 
-    print(":: Starting cleanup")
+    print(f"{utils.Color.start} {utils.Color.make_bold("Starting cleanup...")}")
     cleanup(sd_root)
+
+    print(f"{utils.Color.start} {utils.Color.make_bold("Cleanup complete!")}")
 
 
 def cleanup(sd_root):
-    if config["Cleanup"]["MemoryPit"] == "True":
+    if utils.config.get_option(config, "Cleanup", "memoryPit") == "true":
         memory_pit(sd_root)
-    elif config["Cleanup"]["FlipnoteLenny"] == "True":
+    elif utils.config.get_option(config, "Cleanup", "flipnoteLenny") == "true":
         flipnote_lenny(sd_root)
-    if config["Cleanup"]["Unlaunch"] == "True":
+    if utils.config.get_option(config, "Cleanup", "unlaunch") == "true":
         unlaunch(sd_root)
 
 
 def memory_pit(sd_root):
     print(" removing Memory Pit binary from SD card...")
-    pit_filepath = utils.join_path(sd_root, "private/ds/app/484E494A/pit.bin")
-    try:
-        utils.remove_file(pit_filepath)
-    except Exception as e:
-        print(e)
+    pit_filepath = utils.path.join(sd_root, "private/ds/app/484E494A/pit.bin")
+    utils.file.remove_file(pit_filepath)
+
 
 def flipnote_lenny(sd_root):
-    try:
-        region = utils.get_flipnote_lenny_region(config)
-        print(f":: Using the following region: {region}")
-    except ConfigError as e:
-        print(e)
-        exit(1)
-
+    region = utils.config.get_flipnote_lenny_region(config)
     files = {
         1: "001/800031_104784BAB6B57_000.ppm",
         2: "001/T00031_1038C2A757B77_000.ppm",
@@ -80,28 +61,35 @@ def flipnote_lenny(sd_root):
     print(" removing other Flipnote Studio region folders...")
     for key, path in paths.items():
         if key != region:
-            region_path = utils.join_path(sd_root, path)
-            try:
-                utils.remove_directory(region_path)
-            except Exception as e:
-                print(e)
+            region_path = utils.path.join(sd_root, path)
+            utils.file.remove_directory(region_path)
 
     print(" removing Flipnote Lenny PPM files...")
     for file, path in files.items():
-        directory_path = utils.join_path(sd_root, paths[region])
-        filepath = utils.join_path(directory_path, path)
-        try:
-            utils.remove_file(filepath)
-        except Exception as e:
-            print(e)
+        directory_path = utils.path.join(sd_root, paths[region])
+        filepath = utils.path.join(directory_path, path)
+        utils.file.remove_file(filepath)
+
 
 def unlaunch(sd_root):
     print(" removing Unlaunch files from SD card...")
-    unlaunch_path = utils.join_path(sd_root, "UNLAUNCH.DSI")
-    try:
-        utils.remove_file(unlaunch_path)
-    except Exception as e:
-        print(e)
+    unlaunch_filepath = utils.path.join(sd_root, "UNLAUNCH.DSI")
+    utils.file.remove_file(unlaunch_filepath)
+
+
+def get_yes_no_input(prompt, default=True):
+    while True:
+        choice = input(prompt).strip().lower()
+
+        if choice == "":
+            return default
+        elif choice == "y":
+            return True
+        elif choice == "n":
+            return False
+        else:
+            print("invalid choice: enter y or n")
+
 
 if __name__ == "__main__":
     try:

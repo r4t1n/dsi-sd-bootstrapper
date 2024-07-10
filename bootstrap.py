@@ -5,206 +5,146 @@
 
 import utils
 
-class ConfigError(Exception):
-    pass
 
-config = ""
-try:
-    config = utils.get_config()
-except ConfigError as e:
-    print(e)
-    exit(1)
-
+config = utils.config.get_config()
 tmp_directory = "/tmp/dsi-bootstrap"
 
 
 def main():
     print(
-        ":: You should follow along with this guide: https://dsi.cfw.guide/get-started.html"
+        f"{utils.Color.start} {utils.Color.make_bold("Please follow along with this guide")}: https://dsi.cfw.guide/get-started.html"
     )
 
-    sd_root = ""
-    try:
-        sd_root = utils.get_sd_root(config)
-    except ConfigError as e:
-        print(e)
-        exit(1)
+    sd_root = utils.config.get_sd_root(config)
+    print(f"{utils.Color.start} {utils.Color.make_bold("SD root path")}: {sd_root}")
 
-    sd_root_choice = utils.get_yes_no_input(
-        f">> Is the following SD root path correct: {sd_root} (Y/n): "
+    sd_root_choice = get_yes_no_input(
+        f"{utils.Color.start} {utils.Color.make_bold("Is the SD root path correct? [Y/n]")} "
     )
 
     if not sd_root_choice:
-        print(":: Exiting...")
-        exit(0)
+        exit()
 
     print(" making temporary directory...")
-    try:
-        utils.make_directory(tmp_directory)
-    except Exception as e:
-        print(e)
+    utils.file.make_directory(tmp_directory)
 
-    print(":: Starting stage I")
+    print(f"{utils.Color.start} {utils.Color.make_bold("Starting stage I...")}")
     stage_1(sd_root)
 
-    print(":: Starting stage II")
+    print(f"{utils.Color.start} {utils.Color.make_bold("Starting stage II...")}")
     stage_2(sd_root)
 
-    print(":: Starting stage III")
+    print(f"{utils.Color.start} {utils.Color.make_bold("Starting stage III...")}")
     stage_3(sd_root)
 
-    print(":: Cleaning up temporary files...")
+    print(
+        f"{utils.Color.start} {utils.Color.make_bold("Cleaning up temporary files...")}"
+    )
     tmp_cleanup()
 
-    print(":: Bootstrap complete!")
+    print(f"{utils.Color.start} {utils.Color.make_bold("Bootstrap complete!")}")
 
 
 def stage_1(sd_root):
-    if config["Bootstrap"]["TwilightMenu"] == "True":
+    if utils.config.get_option(config, "Bootstrap", "twilightMenu") == "true":
         print(" downloading TWiLight Menu++ ==> temp directory...")
         twilight_menu_url = "https://github.com/DS-Homebrew/TWiLightMenu/releases/latest/download/TWiLightMenu-DSi.7z"
-        twilight_menu_filepath = utils.join_path(tmp_directory, "TWiLightMenu-DSi.7z")
-        try:
-            utils.download_url(twilight_menu_url, twilight_menu_filepath)
-        except Exception as e:
-            print(e)
+        twilight_menu_filepath = utils.path.join(tmp_directory, "TWiLightMenu-DSi.7z")
+        utils.network.download_url(twilight_menu_url, twilight_menu_filepath)
 
         print(" extracting TWiLight Menu++ 7-Zip archive...")
-        try:
-            utils.extract_7z(twilight_menu_filepath, tmp_directory)
-        except Exception as e:
-            print(e)
+        utils.file.extract_7z(twilight_menu_filepath, tmp_directory)
 
         print(" moving TWiLight Menu++ files to SD card...")
-        nds_path = utils.join_path(tmp_directory, "_nds")
-        boot_nds_filepath = utils.join_path(tmp_directory, "BOOT.NDS")
-        try:
-            utils.copy_directory(nds_path, sd_root)
-        except Exception as e:
-            print(e)
-        try:
-            utils.move_file(boot_nds_filepath, sd_root)
-        except Exception as e:
-            print(e)
+        nds_path = utils.path.join(tmp_directory, "_nds")
+        boot_nds_filepath = utils.path.join(tmp_directory, "BOOT.NDS")
+        utils.file.copy_directory(nds_path, sd_root)
+        utils.file.move_file(boot_nds_filepath, sd_root)
 
-    if config["Bootstrap"]["DumpTool"] == "True":
+    if utils.config.get_option(config, "Bootstrap", "dumpTool") == "true":
         print(" downloading dumpTool ==> SD card...")
         dump_tool_url = (
             "https://github.com/zoogie/dumpTool/releases/latest/download/dumpTool.nds"
         )
-        dump_tool_filepath = utils.join_path(sd_root, "dumpTool.nds")
-        try:
-            utils.download_url(dump_tool_url, dump_tool_filepath)
-        except Exception as e:
-            print(e)
+        dump_tool_filepath = utils.path.join(sd_root, "dumpTool.nds")
+        utils.network.download_url(dump_tool_url, dump_tool_filepath)
 
 
 def stage_2(sd_root):
-    if config["Bootstrap"]["MemoryPit"] == "True":
+    if utils.config.get_option(config, "Bootstrap", "memoryPit") == "true":
         memory_pit(sd_root)
-    elif config["Bootstrap"]["FlipnoteLenny"] == "True":
+    elif utils.config.get_option(config, "Bootstrap", "flipnoteLenny") == "true":
         flipnote_lenny(sd_root)
 
 
 def memory_pit(sd_root):
     print(" making Nintendo DSi Camera directory...")
-    camera_app_path = utils.join_path(sd_root, "private/ds/app/484E494A")
-    try:
-        utils.make_directory(camera_app_path)
-    except Exception as e:
-        print(e)
-
-    pit_urls = {
-        "facebook_icon": "https://dsi.cfw.guide/assets/files/memory_pit/768_1024/pit.bin",
-        "no_facebook_icon": "https://dsi.cfw.guide/assets/files/memory_pit/256/pit.bin",
-    }
-
-    pit_url = ""
-    if config["Bootstrap"]["MemoryPitFacebookIcon"] == "True":
-        pit_url = pit_urls["facebook_icon"]
-    elif config["Bootstrap"]["MemoryPitFacebookIcon"] == "False":
-        pit_url = pit_urls["no_facebook_icon"]
-    else:
-        print("Error: Memory Pit Facebook Icon choice from config file is invalid")
-        facebook_icon_choice = utils.get_yes_no_input(
-            ">> Do you have a FaceBook icon (Y/n): "
-        )
-
-        if facebook_icon_choice:
-            pit_url = pit_urls["facebook_icon"]
-        else:
-            pit_url = pit_urls["no_facebook_icon"]
+    camera_app_path = utils.path.join(sd_root, "private/ds/app/484E494A")
+    utils.file.make_directory(camera_app_path)
 
     print(" downloading Memory Pit binary ==> SD card...")
-    pit_filepath = utils.join_path(camera_app_path, "pit.bin")
-    try:
-        utils.download_url(pit_url, pit_filepath)
-    except Exception as e:
-        print(e)
+    pit_url = utils.config.get_memory_pit_url(config)
+    pit_filepath = utils.path.join(camera_app_path, "pit.bin")
+    utils.network.download_url(pit_url, pit_filepath)
 
 
 def flipnote_lenny(sd_root):
     print(" copying private directory to SD card...")
-    script_directory = utils.get_script_directory()
-    private_directory = utils.join_path(script_directory, "flipnote-lenny/private")
-    try:
-        utils.copy_directory(private_directory, sd_root)
-    except Exception as e:
-        print(e)
+    script_directory = utils.path.get_script_directory()
+    private_directory = utils.path.join(script_directory, "flipnote-lenny/private")
+    utils.file.copy_directory(private_directory, sd_root)
 
 
 def stage_3(sd_root):
-    if config["Bootstrap"]["Unlaunch"] == "True":
+    if utils.config.get_option(config, "Bootstrap", "unlaunch") == "true":
         unlaunch(sd_root)
 
-    if config["Bootstrap"]["Godmode9i"] == "True":
+    if utils.config.get_option(config, "Bootstrap", "godmode9i") == "true":
         godmode9i(sd_root)
 
 
 def unlaunch(sd_root):
     print(" downloading Unlaunch ==> temp directory...")
     unlaunch_url = "https://problemkaputt.de/unlaunch.zip"
-    unlaunch_zip_filepath = utils.join_path(tmp_directory, "unlaunch.zip")
-    try:
-        utils.download_url(unlaunch_url, unlaunch_zip_filepath)
-    except Exception as e:
-        print(e)
+    unlaunch_zip_filepath = utils.path.join(tmp_directory, "unlaunch.zip")
+    utils.network.download_url(unlaunch_url, unlaunch_zip_filepath)
 
     print(" extracting Unlaunch zip archive...")
-    try:
-        utils.extract_zip(unlaunch_zip_filepath, tmp_directory)
-    except Exception as e:
-        print(e)
+    utils.file.extract_zip(unlaunch_zip_filepath, tmp_directory)
 
     print(" moving Unlaunch files to SD card...")
-    unlaunch_filepath = utils.join_path(tmp_directory, "UNLAUNCH.DSI")
-    try:
-        utils.move_file(unlaunch_filepath, sd_root)
-    except Exception as e:
-        print(e)
+    unlaunch_filepath = utils.path.join(tmp_directory, "UNLAUNCH.DSI")
+    utils.file.move_file(unlaunch_filepath, sd_root)
 
 
 def godmode9i(sd_root):
     print(" downloading GodMode9i ==> SD card...")
     godmode9i_url = "https://github.com/DS-Homebrew/GodMode9i/releases/latest/download/GodMode9i.nds"
-    godmode9i_filepath = utils.join_path(sd_root, "GodMode9i.nds")
-    try:
-        utils.download_url(godmode9i_url, godmode9i_filepath)
-    except Exception as e:
-        print(e)
+    godmode9i_filepath = utils.path.join(sd_root, "GodMode9i.nds")
+    utils.network.download_url(godmode9i_url, godmode9i_filepath)
 
 
 def tmp_cleanup():
-    if utils.path_exists(tmp_directory):
-        try:
-            utils.remove_directory(tmp_directory)
-        except Exception as e:
-            print(e)
+    if utils.path.exists(tmp_directory):
+        utils.file.remove_directory(tmp_directory)
+
+
+def get_yes_no_input(prompt, default=True):
+    while True:
+        choice = input(prompt).strip().lower()
+
+        if choice == "":
+            return default
+        elif choice == "y":
+            return True
+        elif choice == "n":
+            return False
+        else:
+            print("invalid choice: enter y or n")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n:: Exiting...")
-        exit(0)
+        exit()
