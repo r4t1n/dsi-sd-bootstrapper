@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
-# This bootstrap script follows this guide:
-# https://dsi.cfw.guide/get-started.html
-
 import utils
-
 
 config = utils.config.get_config()
 tmp_directory = "/tmp/dsi-bootstrap"

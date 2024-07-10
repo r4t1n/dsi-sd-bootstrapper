@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# This cleanup script follows this guide:
-# https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card
-
 import utils
 
 
