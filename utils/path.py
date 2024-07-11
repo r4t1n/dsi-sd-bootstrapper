@@ -1,12 +1,17 @@
 import os
+import pathlib
 
 
-def get_script_directory():
-    return os.path.dirname(os.path.realpath(__file__))
+def to_path(path):
+    return pathlib.Path(path)
 
 
-def join(path, *paths):
-    return os.path.join(path, *paths)
+def script_directory():
+    return pathlib.Path(__file__).resolve().parent
+
+
+def join(*paths):
+    return pathlib.Path(*paths)
 
 
 def exists(path):

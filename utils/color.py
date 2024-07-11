@@ -6,9 +6,9 @@ class Color:
     start = blue + "::" + end
 
     @staticmethod
-    def make_bold(text):
-        return f"{Color.bold}{text}{Color.end}"
+    def format_error(text):
+        return f"{Color.red}error{Color.end}: {text}"
 
     @staticmethod
-    def make_red(text):
-        return f"{Color.red}{text}{Color.end}"
+    def format_start(text):
+        return f"{Color.start} {Color.bold}{text}{Color.end}"

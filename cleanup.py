@@ -2,38 +2,35 @@
 
 import utils
 
-
 config = utils.config.get_config()
 tmp_directory = "/tmp/dsi-bootstrap"
 
 
 def main():
     print(
-        f"{utils.Color.start} {utils.Color.make_bold("This script will perform an SD card cleanup")}: https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card"
+        f"{utils.Color.format_start("This script will follow this guide")}: https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card"
     )
 
     sd_root = utils.config.get_sd_root(config)
-    print(f"{utils.Color.start} {utils.Color.make_bold("SD root path")}: {sd_root}")
+    print(f"{utils.Color.format_start("SD root path")}: {sd_root}")
 
     sd_root_choice = get_yes_no_input(
-        f"{utils.Color.start} {utils.Color.make_bold("Is the SD root path correct? [Y/n]")} "
+        utils.Color.format_start("Is the SD root path correct? [Y/n] ")
     )
 
     if not sd_root_choice:
         exit()
 
-    print(f"{utils.Color.start} {utils.Color.make_bold("Starting cleanup...")}")
+    print(utils.Color.format_start("Starting cleanup..."))
     cleanup(sd_root)
-
-    print(f"{utils.Color.start} {utils.Color.make_bold("Cleanup complete!")}")
 
 
 def cleanup(sd_root):
-    if utils.config.get_option(config, "Cleanup", "memoryPit") == "true":
+    if utils.config.value(config, "cleanup", "memory_pit"):
         memory_pit(sd_root)
-    elif utils.config.get_option(config, "Cleanup", "flipnoteLenny") == "true":
+    elif utils.config.value(config, "cleanup", "flipnote_lenny"):
         flipnote_lenny(sd_root)
-    if utils.config.get_option(config, "Cleanup", "unlaunch") == "true":
+    if utils.config.value(config, "cleanup", "unlaunch"):
         unlaunch(sd_root)
 
 
@@ -75,17 +72,16 @@ def unlaunch(sd_root):
 
 
 def get_yes_no_input(prompt, default=True):
-    while True:
-        choice = input(prompt).strip().lower()
+    choice = input(prompt).strip().lower()
 
-        if choice == "":
-            return default
-        elif choice == "y":
-            return True
-        elif choice == "n":
-            return False
-        else:
-            print("invalid choice: enter y or n")
+    if choice == "":
+        return default
+    elif choice == "y":
+        return True
+    elif choice == "n":
+        return False
+    else:
+        exit(1)
 
 
 if __name__ == "__main__":

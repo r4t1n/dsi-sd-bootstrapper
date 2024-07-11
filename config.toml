@@ -1,0 +1,19 @@
+[options]
+sd_root = ""
+
+# Refer to: https://dsi.cfw.guide/get-started.html
+[bootstrap]
+twilight_menu = true
+dumptool = true
+memory_pit = true
+memory_pit_facebook_icon = true # https://dsi.cfw.guide/launching-the-exploit.html#section-i-checking-your-dsi-camera-version
+flipnote_lenny = false
+unlaunch = true
+godmode9i = false
+
+# Refer to: https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card
+[cleanup]
+memory_pit = true
+flipnote_lenny = false
+flipnote_lenny_region = "" # https://dsi.cfw.guide/installing-unlaunch.html?tab=flipnote-lenny#section-iii-post-unlaunch-configuration
+unlaunch = true

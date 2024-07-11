@@ -8,14 +8,14 @@ tmp_directory = "/tmp/dsi-bootstrap"
 
 def main():
     print(
-        f"{utils.Color.start} {utils.Color.make_bold("Please follow along with this guide")}: https://dsi.cfw.guide/get-started.html"
+        f"{utils.Color.format_start("This script will follow this guide")}: https://dsi.cfw.guide/get-started.html"
     )
 
     sd_root = utils.config.get_sd_root(config)
-    print(f"{utils.Color.start} {utils.Color.make_bold("SD root path")}: {sd_root}")
+    print(f"{utils.Color.format_start("SD root path")}: {sd_root}")
 
     sd_root_choice = get_yes_no_input(
-        f"{utils.Color.start} {utils.Color.make_bold("Is the SD root path correct? [Y/n]")} "
+        utils.Color.format_start("Is the SD root path correct? [Y/n] ")
     )
 
     if not sd_root_choice:
@@ -24,25 +24,31 @@ def main():
     print(" making temporary directory...")
     utils.file.make_directory(tmp_directory)
 
-    print(f"{utils.Color.start} {utils.Color.make_bold("Starting stage I...")}")
+    print(utils.Color.format_start("Starting stage I..."))
     stage_1(sd_root)
 
-    print(f"{utils.Color.start} {utils.Color.make_bold("Starting stage II...")}")
+    print(utils.Color.format_start("Starting stage II..."))
     stage_2(sd_root)
 
-    print(f"{utils.Color.start} {utils.Color.make_bold("Starting stage III...")}")
+    print(utils.Color.format_start("Starting stage III..."))
     stage_3(sd_root)
 
-    print(
-        f"{utils.Color.start} {utils.Color.make_bold("Cleaning up temporary files...")}"
-    )
+    print(utils.Color.format_start("Cleaning up temporary files..."))
     tmp_cleanup()
 
-    print(f"{utils.Color.start} {utils.Color.make_bold("Bootstrap complete!")}")
+
+def get_sd_root():
+    sd_root = utils.config.value(config, "options", "sd_root")
+
+    if not utils.path.exists(sd_root):
+        print(utils.Color.format_error("'sd_root' from config.toml is invalid"))
+        exit(1)
+
+    return sd_root
 
 
 def stage_1(sd_root):
-    if utils.config.get_option(config, "Bootstrap", "twilightMenu") == "true":
+    if utils.config.value(config, "bootstrap", "twilight_menu"):
         print(" downloading TWiLight Menu++ ==> temp directory...")
         twilight_menu_url = "https://github.com/DS-Homebrew/TWiLightMenu/releases/latest/download/TWiLightMenu-DSi.7z"
         twilight_menu_filepath = utils.path.join(tmp_directory, "TWiLightMenu-DSi.7z")
@@ -54,10 +60,10 @@ def stage_1(sd_root):
         print(" moving TWiLight Menu++ files to SD card...")
         nds_path = utils.path.join(tmp_directory, "_nds")
         boot_nds_filepath = utils.path.join(tmp_directory, "BOOT.NDS")
-        utils.file.copy_directory(nds_path, sd_root)
-        utils.file.move_file(boot_nds_filepath, sd_root)
+        utils.file.move(nds_path, sd_root)
+        utils.file.move(boot_nds_filepath, sd_root)
 
-    if utils.config.get_option(config, "Bootstrap", "dumpTool") == "true":
+    if utils.config.value(config, "bootstrap", "dumptool"):
         print(" downloading dumpTool ==> SD card...")
         dump_tool_url = (
             "https://github.com/zoogie/dumpTool/releases/latest/download/dumpTool.nds"
@@ -67,9 +73,9 @@ def stage_1(sd_root):
 
 
 def stage_2(sd_root):
-    if utils.config.get_option(config, "Bootstrap", "memoryPit") == "true":
+    if utils.config.value(config, "bootstrap", "memory_pit"):
         memory_pit(sd_root)
-    elif utils.config.get_option(config, "Bootstrap", "flipnoteLenny") == "true":
+    elif utils.config.value(config, "bootstrap", "flipnote_lenny"):
         flipnote_lenny(sd_root)
 
 
@@ -92,10 +98,10 @@ def flipnote_lenny(sd_root):
 
 
 def stage_3(sd_root):
-    if utils.config.get_option(config, "Bootstrap", "unlaunch") == "true":
+    if utils.config.value(config, "bootstrap", "unlaunch"):
         unlaunch(sd_root)
 
-    if utils.config.get_option(config, "Bootstrap", "godmode9i") == "true":
+    if utils.config.value(config, "bootstrap", "godmode9i"):
         godmode9i(sd_root)
 
 
@@ -110,7 +116,7 @@ def unlaunch(sd_root):
 
     print(" moving Unlaunch files to SD card...")
     unlaunch_filepath = utils.path.join(tmp_directory, "UNLAUNCH.DSI")
-    utils.file.move_file(unlaunch_filepath, sd_root)
+    utils.file.move(unlaunch_filepath, sd_root)
 
 
 def godmode9i(sd_root):
@@ -126,17 +132,16 @@ def tmp_cleanup():
 
 
 def get_yes_no_input(prompt, default=True):
-    while True:
-        choice = input(prompt).strip().lower()
+    choice = input(prompt).strip().lower()
 
-        if choice == "":
-            return default
-        elif choice == "y":
-            return True
-        elif choice == "n":
-            return False
-        else:
-            print("invalid choice: enter y or n")
+    if choice == "":
+        return default
+    elif choice == "y":
+        return True
+    elif choice == "n":
+        return False
+    else:
+        exit(1)
 
 
 if __name__ == "__main__":
