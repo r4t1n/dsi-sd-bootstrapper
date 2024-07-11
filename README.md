@@ -4,28 +4,27 @@ These Python scrips will get your SD card bootstrapped for homebrewing your Nint
 
 ## config.ini
 
-Before running any scripts you should edit the `config.ini` file, most of the options are simple True and False options to bootstrap the chosen program. Here's an example:
+Before running any scripts you should edit the `config.toml` file, most of the options are simple true and false values to bootstrap the chosen program. Here's an example:
 
 ```
-[Options]
-sdRoot =
+[options]
+sd_root = ""
 
-; Refer to: https://dsi.cfw.guide/get-started.html#section-i-prep-work
-; Memory Pit Facebook Icon: https://dsi.cfw.guide/launching-the-exploit.html#section-i-checking-your-dsi-camera-version
-[Bootstrap]
-twilightMenu = true
-dumpTool = true
-memoryPit = true
-memoryPitFacebookIcon = true
-flipnoteLenny = false
+# Refer to: https://dsi.cfw.guide/get-started.html
+[bootstrap]
+twilight_menu = true
+dumptool = true
+memory_pit = true
+memory_pit_facebook_icon = true # https://dsi.cfw.guide/launching-the-exploit.html#section-i-checking-your-dsi-camera-version
+flipnote_lenny = false
 unlaunch = true
 godmode9i = false
 
-; Refer to: https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card
-[Cleanup]
-memoryPit = true
-flipnoteLenny = false
-flipnoteLennyRegion =
+# Refer to: https://dsi.cfw.guide/installing-unlaunch.html#section-iv-cleaning-up-your-sd-card
+[cleanup]
+memory_pit = true
+flipnote_lenny = false
+flipnote_lenny_region = "" # https://dsi.cfw.guide/installing-unlaunch.html?tab=flipnote-lenny#section-iii-post-unlaunch-configuration
 unlaunch = true
 ```
 
