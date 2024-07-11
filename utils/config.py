@@ -15,8 +15,8 @@ def get_config():
 def value(config, table, key):
     try:
         return config[table][key]
-    except KeyError as key_error:
-        print(utils.Color.format_error(key_error))
+    except KeyError:
+        print(utils.Color.format_error(f"'{key}' from config.toml is invalid"))
         exit(1)
     except Exception as error:
         print(utils.Color.format_error(error))
